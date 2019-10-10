@@ -16,7 +16,11 @@ This project contains the source code for the Axon Labs. It contains two modules
   and events across multiple instances of the application.
   
   Want to do this lab? Visit [scaling out exercises](chat-scaling-out/README.md).
-  
+
+
+```$shell
+docker run -d -p 8024:8024 -p 8124:8124 -p 8224:8224 --name axonserver axoniq/axonserver
+```  
 
 If you have any questions, don't hesitate to ask your Lab coordinator for guidance.
 

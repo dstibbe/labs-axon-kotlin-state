@@ -16,15 +16,15 @@ public class ChatScalingOutApplicationTests {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092");
-        server.start();
+//        server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092");
+//        server.start();
     }
 
     @AfterClass
     public static void afterClass() {
-        if (server != null) {
-            server.stop();
-        }
+//        if (server != null) {
+//            server.stop();
+//        }
     }
 
     @Test

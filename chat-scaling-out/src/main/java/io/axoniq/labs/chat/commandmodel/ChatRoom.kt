@@ -1,9 +1,6 @@
 package io.axoniq.labs.chat.commandmodel
 
-import io.axoniq.labs.chat.coreapi.ChatCommand
-import io.axoniq.labs.chat.coreapi.ChatEvent
-import io.axoniq.labs.chat.coreapi.CreateRoomCommand
-import io.axoniq.labs.chat.coreapi.RoomCreatedEvent
+import io.axoniq.labs.chat.coreapi.*
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
@@ -11,10 +8,7 @@ import org.axonframework.modelling.command.AggregateLifecycle.apply
 import org.axonframework.spring.stereotype.Aggregate
 
 @Aggregate
-open class ChatRoom
-{
-
-
+class ChatRoom {
     @AggregateIdentifier
     private lateinit var roomId: String
 
@@ -28,9 +22,13 @@ open class ChatRoom
     }
 
     @CommandHandler
-    fun handleCommand(command: ChatCommand) {
-        state.handle(command)
-    }
+    fun handleCommand(command: JoinRoomCommand) = state.handle(command)
+
+    @CommandHandler
+    fun handleCommand(command: PostMessageCommand) = state.handle(command)
+
+    @CommandHandler
+    fun handleCommand(command: LeaveRoomCommand) = state.handle(command)
 
     @EventSourcingHandler
     fun handleEvent(event: ChatEvent) {
@@ -43,7 +41,7 @@ open class ChatRoom
         }
     }
 
-    private fun initializeId(event:RoomCreatedEvent){
+    private fun initializeId(event: RoomCreatedEvent) {
         this.roomId = event.roomId
     }
 }
