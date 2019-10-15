@@ -1,13 +1,11 @@
 package io.axoniq.labs.chat.commandmodel
 
 import io.axoniq.labs.chat.coreapi.*
-import org.axonframework.modelling.command.AggregateLifecycle.apply
-import org.springframework.util.Assert
-import java.util.*
 
 data class ChatRoomState(
-        var participants: Set<String> = HashSet()
+        val participants: Set<String> = emptySet()
 ) : AggregateState<ChatEvent, ChatCommand> {
+
     companion object {
         fun createBy(event: RoomCreatedEvent) = ChatRoomState()
     }
@@ -23,25 +21,24 @@ data class ChatRoomState(
             else -> this
         }
     }
-
-    override fun handle(command: ChatCommand) {
-        when (command) {
-            is JoinRoomCommand -> if (!participants.contains(command.participant)) {
-                apply(ParticipantJoinedRoomEvent(command.participant, command.roomId))
-            }
-            is LeaveRoomCommand -> if (participants.contains(command.participant)) {
-                apply(ParticipantLeftRoomEvent(command.participant, command.roomId))
-            }
-            is PostMessageCommand -> {
-                Assert.state(
-                        participants.contains(command.participant),
-                        "You cannot post messages unless you've joined the chat room"
-                )
-                apply(MessagePostedEvent(command.participant, command.roomId, command.message))
-            }
-        }
-    }
 }
 
+fun ChatRoomState.evaluate(command: ChatCommand): ChatEvent? {
+    return when (command) {
+        is JoinRoomCommand -> when {
+            !participants.contains(command.participant) -> ParticipantJoinedRoomEvent(command.participant, command.roomId)
+            else -> throw AlreadyJoined()
+        }
+        is LeaveRoomCommand -> when {
+            participants.contains(command.participant) -> ParticipantLeftRoomEvent(command.participant, command.roomId)
+            else -> null
+        }
+        is PostMessageCommand -> when {
+            participants.contains(command.participant) -> MessagePostedEvent(command.participant, command.roomId, command.message)
+            else -> throw NotJoined()
+        }
+        else -> null
+    }
+}
 
 

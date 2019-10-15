@@ -1,5 +1,11 @@
 package io.axoniq.labs.chat
 
+import org.axonframework.commandhandling.CommandBus
+import org.axonframework.commandhandling.CommandMessage
+import org.axonframework.commandhandling.SimpleCommandBus
+import org.axonframework.common.transaction.TransactionManager
+import org.axonframework.messaging.interceptors.CorrelationDataInterceptor
+import org.axonframework.spring.config.AxonConfiguration
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
@@ -27,4 +33,19 @@ class SwaggerConfig {
             .apis(RequestHandlerSelectors.any())
             .paths(PathSelectors.any())
             .build()
+}
+
+@Configuration
+class AxonConfig{
+//    @Bean
+    fun commandBus(txManager: TransactionManager, axonConfiguration: AxonConfiguration): SimpleCommandBus {
+        val commandBus = SimpleCommandBus.builder()
+                .transactionManager(txManager)
+                .messageMonitor(axonConfiguration.messageMonitor<CommandMessage<*>>(CommandBus::class.java, "commandBus"))
+                .build()
+        commandBus.registerHandlerInterceptor(
+                CorrelationDataInterceptor<CommandMessage<*>>(axonConfiguration.correlationDataProviders())
+        )
+        return commandBus
+    }
 }

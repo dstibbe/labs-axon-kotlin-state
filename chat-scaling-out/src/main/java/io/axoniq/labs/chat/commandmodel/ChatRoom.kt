@@ -8,27 +8,29 @@ import org.axonframework.modelling.command.AggregateLifecycle.apply
 import org.axonframework.spring.stereotype.Aggregate
 
 @Aggregate
-class ChatRoom {
+class ChatRoom() {
     @AggregateIdentifier
     private lateinit var roomId: String
 
     private lateinit var state: ChatRoomState
 
-    constructor()
-
     @CommandHandler
-    constructor(command: CreateRoomCommand) {
+    constructor(command: CreateRoomCommand) : this() {
         apply(RoomCreatedEvent(command.roomId, command.name))
     }
 
     @CommandHandler
-    fun handleCommand(command: JoinRoomCommand) = state.handle(command)
+    fun handleCommand(command: JoinRoomCommand) = doHandleCommand(command)
 
     @CommandHandler
-    fun handleCommand(command: PostMessageCommand) = state.handle(command)
+    fun handleCommand(command: LeaveRoomCommand) = doHandleCommand(command)
 
     @CommandHandler
-    fun handleCommand(command: LeaveRoomCommand) = state.handle(command)
+    fun handleCommand(command: PostMessageCommand) = doHandleCommand(command)
+
+    fun doHandleCommand(command: ChatCommand) {
+        state.evaluate(command)?.also{ apply(it)}
+    }
 
     @EventSourcingHandler
     fun handleEvent(event: ChatEvent) {
